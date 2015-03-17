@@ -106,10 +106,8 @@
 					};
 				}
 				$.post('get-blog.php', data, function(data) {
-					if(data.images > 0)
-						Dumpr.images += data.images;
-					if(data.posts > 0)
-						Dumpr.posts += data.posts;
+					Dumpr.images += data.imgs;
+					Dumpr.posts += data.posts;
 					if(data.status == 'downloading') {
 						// Update progress and continue download
 						$('#progress-bar .progress-bar').css('width', ((data.offset + data.posts) / data.total_posts * 100) + '%');
