@@ -12,7 +12,10 @@ if(empty($_REQUEST['blog'])) {
 }
 
 // Set some initial variables
-$limit = 1000;
+$offset = 0;
+if(isset($_REQUEST['offset']) && isset($_REQUEST['posts'])) {
+	$offset = $_REQUEST['offset'] + $_REQUEST['posts'];
+}
 $blog = $_REQUEST['blog'];
 if(!strpos($blog, ".")) {
 	$blog .= ".tumblr.com";
@@ -28,43 +31,37 @@ $num_posts_seen = 0;
 $imgs = array();
 $base = "https://api.tumblr.com/v2/blog/{$blog}/posts/photo?api_key=" . urlencode($consumer_key);
 
-while($num_posts_seen < $limit) {
-	$remaining = $limit - $num_posts_seen;
+$req = file_get_contents("{$base}&offset=" . intval($offset));
+$obj = json_decode($req);
 
-	set_time_limit(60);
+if($obj->meta->status != 200) {
+	exit($obj->meta->msg);
+}
 
-	$req = file_get_contents($base . "&limit=" . ($remaining > 20 ? 20 : $remaining) . "&offset={$num_posts_seen}");
-	$obj = json_decode($req);
-
-	if($obj->meta->status != 200) {
-		exit($obj->meta->msg);
-	}
-
-	if($obj->response->total_posts < $limit) {
-		$limit = $obj->response->total_posts;
-		$remaining = $limit - $num_posts_seen;
-	}
-
-	foreach($obj->response->posts as $post) {
-		$num_posts_seen++;
-		foreach($post->photos as $photo) {
-			$src = $photo->alt_sizes[0]->url;
-			if(!is_file("$blog/" . basename($src))) {
-				file_put_contents("$blog/" . basename($src), file_get_contents($src));
-			}
-			$imgs[] = $src;
+foreach($obj->response->posts as $post) {
+	$num_posts_seen++;
+	foreach($post->photos as $photo) {
+		$src = $photo->alt_sizes[0]->url;
+		if(!is_file("$blog/" . basename($src))) {
+			file_put_contents("$blog/" . basename($src), file_get_contents($src));
 			usleep(100000);
 		}
+		$imgs[] = $src;
 	}
-
-	usleep(500000);
-
 }
 
 $response = array(
+	"status" => "complete",
+	"total_posts" => $obj->response->total_posts,
 	"posts" => $num_posts_seen,
-	"imgs" => count($imgs)
+	"offset" => $offset,
+	"imgs" => count($imgs),
+	"blog" => $blog
 );
+
+if($obj->response->total_posts > ($offset + 20)) {
+	$response["status"] = "downloading";
+}
 
 header('Content-type: application/json');
 echo json_encode($response);

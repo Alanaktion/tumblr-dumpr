@@ -67,13 +67,13 @@
 			<form class="form-inline text-center" id="frm-dump" action="get-blog.php" method="post">
 				<div class="form-group form-group-lg">
 					<label for="blog" class="sr-only">Blog Domain</label>
-					<input type="text" class="form-control" name="blog" id="blog" placeholder="alanaktion.tumblr.com" autocomplete="off" autofocus>
+					<input type="text" class="form-control" name="blog" id="blog" placeholder="alanaktion.tumblr.com" autocomplete="off" required autofocus>
 				</div>
 				<button type="submit" class="btn btn-primary btn-lg">Start Download</button>
 			</form>
 
 			<p class="text-center hidden" id="msg">
-				Downloading images&hellip;
+				Starting download&hellip;
 			</p>
 		</div>
 
@@ -82,23 +82,57 @@
 		</footer>
 	</div>
 
+	<div class="hidden" id="progress-bar">
+		<div class="progress">
+			<div class="progress-bar" role="progressbar" style="width: 60%;"></div>
+		</div>
+	</div>
+
 	<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
 		// Popular blogs
 		var blogs = ['tldrwikipedia', 'ghostphotographs', 'ifpaintingscouldtext', 'willitbeard', 'itsliketheyknowus', 'moviecode', 'worstcats', 'popsonnet', 'museumofselfies'];
 
+		// Dumpr core class
+		var Dumpr = {
+			images: 0,
+			posts: 0,
+			getBlogAjax: function(data) {
+				if(!data) {
+					data = {
+						blog: $('#blog').val(),
+						offset: 0
+					};
+				}
+				$.post('get-blog.php', data, function(data) {
+					if(data.images > 0)
+						Dumpr.images += data.images;
+					if(data.posts > 0)
+						Dumpr.posts += data.posts;
+					if(data.status == 'downloading') {
+						// Update progress and continue download
+						$('#progress-bar .progress-bar').css('width', (data.posts / data.total_posts * 100) + '%');
+						$('#msg').html($('#progress-bar').html());
+						Dumpr.getBlogAjax(data);
+					} else if(data.status == 'complete') {
+						// Show completed status
+						$('#msg').html('Download ready!&ensp;Posts:' + Dumpr.posts + ' Images: ' + Dumpr.images + '<br>');
+						$('<a />').attr('href', 'dl-zip.php?blog=' + encodeURIComponent($('#blog').val())).addClass('btn btn-success').text('Download Zip').appendTo('#msg');
+						$('#blog').prop('disabled', false);
+					}
+				}, 'json');
+			}
+		};
+
 		$(document).ready(function() {
 
 			// Handle form submission
 			$('#frm-dump').submit(function(e) {
-				$.post($(this).attr('action'), $(this).serialize(), function(data) {
-					$('#msg').html('Download ready!&ensp;Posts:' + data.posts + ' Images: ' + data.imgs + '<br>');
-					$('<a />').attr('href', 'dl-zip.php?blog=' + encodeURIComponent($('#blog').val())).addClass('btn btn-success').text('Download Zip').appendTo('#msg');
-				}, 'json');
+				e.preventDefault();
+				Dumpr.getBlogAjax();
 				$('#blog').prop('disabled', true);
 				$('#msg').removeClass('hidden');
-				e.preventDefault();
 			});
 
 			// Rotate blog placeholders
