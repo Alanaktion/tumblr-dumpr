@@ -92,7 +92,7 @@
 	<script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
 		// Popular blogs
-		var blogs = ['tldrwikipedia', 'ghostphotographs', 'ifpaintingscouldtext', 'willitbeard', 'itsliketheyknowus', 'moviecode', 'worstcats', 'popsonnet', 'museumofselfies'];
+		var blogs = ['tldrwikipedia', 'ghostphotographs', 'ifpaintingscouldtext', 'willitbeard', 'twitterthecomic', 'comedycentral', 'theworstroom', 'bridesthrowingcats', 'yachtcats', 'thischarmingcharlie', 'moviecode', 'worstcats', 'popsonnet', 'museumofselfies'];
 
 		// Dumpr core class
 		var Dumpr = {
