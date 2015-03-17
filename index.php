@@ -112,7 +112,7 @@
 						Dumpr.posts += data.posts;
 					if(data.status == 'downloading') {
 						// Update progress and continue download
-						$('#progress-bar .progress-bar').css('width', (data.posts / data.total_posts * 100) + '%');
+						$('#progress-bar .progress-bar').css('width', ((data.offset + data.posts) / data.total_posts * 100) + '%');
 						$('#msg').html($('#progress-bar').html());
 						Dumpr.getBlogAjax(data);
 					} else if(data.status == 'complete') {
