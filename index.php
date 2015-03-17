@@ -115,7 +115,7 @@
 						Dumpr.getBlogAjax(data);
 					} else if(data.status == 'complete') {
 						// Show completed status
-						$('#msg').html('Download ready!&ensp;Posts:' + Dumpr.posts + ' Images: ' + Dumpr.images + '<br>');
+						$('#msg').html('Download ready!&ensp;Posts: ' + Dumpr.posts + ' Images: ' + Dumpr.images + '<br>');
 						$('<a />').attr('href', 'dl-zip.php?blog=' + encodeURIComponent($('#blog').val())).addClass('btn btn-success').text('Download Zip').appendTo('#msg');
 						$('#blog').prop('disabled', false);
 					}
